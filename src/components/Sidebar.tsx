@@ -5,7 +5,7 @@ const linkStyle =
 
 const Sidebar = () => {
   return (
-    <aside className="flex flex-col justify-between px-6 py-7 min-[801px]:fixed min-[801px]:inset-y-0 min-[801px]:left-0 min-[801px]:w-[260px] min-[801px]:px-9 min-[801px]:py-[42px]">
+    <aside className="flex flex-col justify-between px-6 py-7 min-[801px]:sticky min-[801px]:top-0 min-[801px]:h-screen min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:px-9 min-[801px]:py-[42px]">
       <div>
         <a className={`${linkStyle} text-xl font-bold`} href="#about">
           {myInfo.name.first + " " + myInfo.name.second}
