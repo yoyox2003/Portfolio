@@ -1,6 +1,11 @@
 const myInfo = {
-  name: "Youssef Ahmed Hany",
-  title: "Junior Software Engineer",
+  name: {
+    first: "Youssef",
+    second: "Ahmed",
+    last: "Hany",
+    full: "Youssef Ahmed Hany",
+  },
+  title: "Software Engineer",
   location: "Cairo, Egypt",
   contact: {
     phone: "+20-101-775-5504",
@@ -9,7 +14,7 @@ const myInfo = {
     github: "https://github.com/yoyox2003",
   },
   summary:
-    "Computer Science graduate with a 3.86 GPA and Top 10 university ranking. Experience across front-end development and DevOps practices, including web applications, containerization, cloud infrastructure, and CI/CD. Seeking a junior Software Engineering role.",
+    "Computer Science graduate with a 3.86 GPA and Top 10 university ranking. Experience across front-end development and DevOps practices, including web applications, containerization, cloud infrastructure, and CI/CD.",
   education: {
     degree: "Bachelor of Science in Computer Science",
     institutions: ["Future University in Egypt", "University of Cincinnati"],
