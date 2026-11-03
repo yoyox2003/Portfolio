@@ -32,13 +32,40 @@ for (let index = 0; index < 256; index++) {
   }
 }
 
+function dotIntensity(row: number, column: number, phase: number, charge: number) {
+  const index = Math.min(row, 15 - row) * 6 + Math.min(column, 11 - column);
+  const offset = Math.min(row, 15 - row) * 0.006 + Math.min(column, 11 - column) * 0.004;
+  const progress = (((phase - offset) % 1 + 1) % 1) * stages.length;
+  const stage = Math.floor(progress);
+  const t = progress - stage;
+  const previous = stages[(stage + stages.length - 1) % stages.length][index];
+  const from = stages[stage][index];
+  const to = stages[(stage + 1) % stages.length][index];
+  const next = stages[(stage + 2) % stages.length][index];
+  // Periodic Catmull–Rom preserves motion through stage and loop boundaries.
+  const value = 0.5 * (2 * from + (to - previous) * t +
+    (2 * previous - 5 * from + 4 * to - next) * t * t +
+    (-previous + 3 * from - 3 * to + next) * t * t * t);
+  const base = Math.max(0, value) / 9;
+  const threshold = ((index * 17) % 48) / 64;
+  const activation = Math.max(0, Math.min(1, (charge - threshold) / 0.25));
+  const blend = activation * activation * (3 - 2 * activation);
+  return base + (Math.max(base, 0.65) - base) * blend;
+}
+
+export function getThermalFieldBounds(firstX: number, firstY: number, spacing: number) {
+  const padding = Math.ceil(spacing * 1.5) + 2;
+  const x = Math.floor(firstX - padding);
+  const y = Math.floor(firstY - padding);
+  return { x, y, width: Math.ceil(firstX + 11 * spacing + padding) - x, height: Math.ceil(firstY + 15 * spacing + padding) - y };
+}
+
 export function createThermalField(width: number, height: number, spacing: number) {
   const surface = document.createElement("canvas");
   surface.width = Math.max(1, Math.round(width / 2));
   surface.height = Math.max(1, Math.round(height / 2));
   const context = surface.getContext("2d");
   if (!context) return null;
-
   const { width: columns, height: rows } = surface;
   const scaleX = columns / width;
   const scaleY = rows / height;
@@ -47,62 +74,28 @@ export function createThermalField(width: number, height: number, spacing: numbe
   const radius = Math.ceil(spacing * 1.4 * Math.max(scaleX, scaleY));
   const diameter = radius * 2 + 1;
   const kernel = new Float32Array(diameter * diameter);
-
   for (let y = -radius; y <= radius; y++) {
     for (let x = -radius; x <= radius; x++) {
       const distance = (x / (spacing * scaleX)) ** 2 + (y / (spacing * scaleY)) ** 2;
-      // A broad field joins neighbors; the narrower peak retains individual dot centers.
       kernel[(y + radius) * diameter + x + radius] =
         0.85 * Math.exp(-distance / (2 * 0.5 ** 2)) + 0.5 * Math.exp(-distance / (2 * 0.17 ** 2));
     }
   }
-
-  return (firstX: number, firstY: number, phase: number) => {
+  return (firstX: number, firstY: number, phase: number, charge = 0) => {
     heat.fill(0);
-
     for (let row = 0; row < 16; row++) {
       for (let column = 0; column < 12; column++) {
-        const mirroredRow = Math.min(row, 15 - row);
-        const mirroredColumn = Math.min(column, 11 - column);
-        const index = mirroredRow * 6 + mirroredColumn;
-        // A small spatial delay lets heat flow across the grid without breaking symmetry.
-        const offset = mirroredRow * 0.006 + mirroredColumn * 0.004;
-        const progress = (((phase - offset) % 1 + 1) % 1) * stages.length;
-        const stage = Math.floor(progress);
-        const t = progress - stage;
-        const previous = stages[(stage + stages.length - 1) % stages.length][index];
-        const from = stages[stage][index];
-        const to = stages[(stage + 1) % stages.length][index];
-        const next = stages[(stage + 2) % stages.length][index];
-        // Periodic Catmull–Rom interpolation carries velocity through each stage
-        // and the loop boundary, instead of easing every dot to a stop together.
-        const value = 0.5 * (
-          2 * from +
-          (to - previous) * t +
-          (2 * previous - 5 * from + 4 * to - next) * t * t +
-          (-previous + 3 * from - 3 * to + next) * t * t * t
-        );
-        const intensity = Math.max(0, value) / 9;
-        if (intensity === 0) continue;
+        const intensity = dotIntensity(row, column, phase, charge);
+        if (intensity < 1 / 1024) continue;
         const centerX = Math.round((firstX + column * spacing) * scaleX);
         const centerY = Math.round((firstY + row * spacing) * scaleY);
-        for (
-          let y = Math.max(0, centerY - radius);
-          y <= Math.min(rows - 1, centerY + radius);
-          y++
-        ) {
-          for (
-            let x = Math.max(0, centerX - radius);
-            x <= Math.min(columns - 1, centerX + radius);
-            x++
-          ) {
-            heat[y * columns + x] +=
-              intensity * kernel[(y - centerY + radius) * diameter + x - centerX + radius];
+        for (let y = Math.max(0, centerY - radius); y <= Math.min(rows - 1, centerY + radius); y++) {
+          for (let x = Math.max(0, centerX - radius); x <= Math.min(columns - 1, centerX + radius); x++) {
+            heat[y * columns + x] += intensity * kernel[(y - centerY + radius) * diameter + x - centerX + radius];
           }
         }
       }
     }
-
     for (let index = 0; index < heat.length; index++) {
       const color = Math.min(255, Math.round(heat[index] * 255)) * 4;
       const pixel = index * 4;

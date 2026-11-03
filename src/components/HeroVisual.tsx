@@ -1,115 +1,115 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef, type RefObject } from "react";
 import { gsap } from "gsap";
-import { createThermalField } from "@/lib/thermalField";
+import { createThermalField, getThermalFieldBounds } from "@/lib/thermalField";
 
-const HeroVisual = () => {
+export type HeroVisualController = {
+  setCharge: (charge: number) => void;
+  reset: () => void;
+};
+type HeroVisualProps = {
+  originRef: RefObject<HTMLDivElement | null>;
+  controllerRef: RefObject<HeroVisualController | null>;
+};
+
+const HeroVisual = ({ originRef, controllerRef }: HeroVisualProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext("2d");
-    const grid = canvas?.closest<HTMLElement>("[data-dot-grid]");
-    if (!canvas || !context || !grid) return;
+    const hero = canvas?.closest<HTMLElement>("[data-dot-grid]");
+    const origin = originRef.current;
+    if (!canvas || !context || !hero || !origin) return;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const phase = { value: 0 };
+    const spacing = Number.parseFloat(getComputedStyle(hero).getPropertyValue("--dot-grid-spacing"));
+    let charge = 0;
     let visible = false;
     let width = 0;
     let height = 0;
-    let scrollFrame = 0;
-    let renderField: ReturnType<typeof createThermalField> = null;
-    const spacing = Number.parseFloat(
-      getComputedStyle(grid).getPropertyValue("--dot-grid-spacing"),
-    );
+    let slotX = 0;
+    let slotY = 0;
+    let slotWidth = 0;
+    let slotHeight = 0;
+    let centerX = 0;
+    let centerY = 0;
+    let renderIdle: ReturnType<typeof createThermalField> = null;
+    let idleBounds: ReturnType<typeof getThermalFieldBounds> | null = null;
 
     const draw = () => {
-      if (!width || !height || !renderField) return;
+      if (!width || !height || !renderIdle || !idleBounds) return;
       context.clearRect(0, 0, width, height);
+      const firstX = spacing / 2 + Math.round((centerX - spacing / 2) / spacing - 5.5) * spacing;
+      const firstY = spacing / 2 + Math.round((centerY - spacing / 2) / spacing - 7.5) * spacing;
+      context.drawImage(
+        renderIdle(firstX - idleBounds.x, firstY - idleBounds.y, phase.value, charge),
+        idleBounds.x, idleBounds.y, idleBounds.width, idleBounds.height,
+      );
 
-      // Matching distances from the center give all four quadrants the same pattern.
-      const canvasRect = canvas.getBoundingClientRect();
-      const gridRect = grid.getBoundingClientRect();
-      const offsetX = canvasRect.left - gridRect.left;
-      const offsetY = canvasRect.top - gridRect.top;
-      // The CSS grid's first dot is half a cell from the background origin.
-      const firstX =
-        spacing / 2 +
-        Math.round((offsetX + width / 2 - spacing / 2) / spacing - 5.5) * spacing -
-        offsetX;
-      const firstY =
-        spacing / 2 +
-        Math.round((offsetY + height / 2 - spacing / 2) / spacing - 7.5) * spacing -
-        offsetY;
-      context.imageSmoothingEnabled = true;
-      context.drawImage(renderField(firstX, firstY, phase.value), 0, 0, width, height);
     };
-
-    const tween = gsap.to(phase, {
-      value: 1,
-      duration: 5,
-      ease: "none",
-      repeat: -1,
-      paused: true,
-      onUpdate: draw,
-    });
-
+    const tween = gsap.to(phase, { value: 1, duration: 5, ease: "none", repeat: -1, paused: true, onUpdate: draw });
     const updatePlayback = () => {
       if (visible && !document.hidden && !motion.matches) tween.play();
       else tween.pause();
-      if (motion.matches) {
-        phase.value = 0.18;
-        draw();
-      }
+      if (motion.matches) phase.value = 0.18;
+      draw();
     };
-
-    const resizeObserver = new ResizeObserver(([entry]) => {
-      width = entry.contentRect.width;
-      height = entry.contentRect.height;
-      if (!width || !height) return;
-      renderField = createThermalField(width, height, spacing);
+    controllerRef.current = {
+      setCharge(value) {
+        charge = value;
+        hero.style.setProperty("--hero-charge", String(value));
+      },
+      reset() {
+        charge = 0;
+        hero.style.setProperty("--hero-charge", "0");
+        updatePlayback();
+      },
+    };
+    const resize = () => {
+      const rect = hero.getBoundingClientRect();
+      const slot = origin.getBoundingClientRect();
+      width = hero.clientWidth;
+      height = hero.clientHeight;
+      slotX = slot.left - rect.left;
+      slotY = slot.top - rect.top;
+      slotWidth = slot.width;
+      slotHeight = slot.height;
+      if (!width || !height || !slotWidth || !slotHeight) return;
+      centerX = slotX + slotWidth / 2;
+      centerY = slotY + slotHeight / 2;
+      const firstX = spacing / 2 + Math.round((centerX - spacing / 2) / spacing - 5.5) * spacing;
+      const firstY = spacing / 2 + Math.round((centerY - spacing / 2) / spacing - 7.5) * spacing;
+      idleBounds = getThermalFieldBounds(firstX, firstY, spacing);
+      renderIdle = createThermalField(idleBounds.width, idleBounds.height, spacing);
       const density = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = Math.round(width * density);
       canvas.height = Math.round(height * density);
       context.setTransform(density, 0, 0, density, 0, 0);
+      context.imageSmoothingEnabled = true;
       draw();
-    });
+    };
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(hero);
+    resizeObserver.observe(origin);
     const intersectionObserver = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
       updatePlayback();
     });
-
-    const onScroll = () => {
-      if (!visible || document.hidden || scrollFrame) return;
-      scrollFrame = requestAnimationFrame(() => {
-        scrollFrame = 0;
-        draw();
-      });
-    };
-
-    resizeObserver.observe(canvas);
-    intersectionObserver.observe(canvas);
+    intersectionObserver.observe(hero);
     motion.addEventListener("change", updatePlayback);
     document.addEventListener("visibilitychange", updatePlayback);
-    window.addEventListener("scroll", onScroll, { passive: true });
-
+    resize();
     return () => {
+      controllerRef.current = null;
       tween.kill();
       resizeObserver.disconnect();
       intersectionObserver.disconnect();
       motion.removeEventListener("change", updatePlayback);
       document.removeEventListener("visibilitychange", updatePlayback);
-      window.removeEventListener("scroll", onScroll);
-      cancelAnimationFrame(scrollFrame);
+      hero.style.removeProperty("--hero-charge");
     };
-  }, []);
+  }, [controllerRef, originRef]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      aria-hidden="true"
-      className="pointer-events-none aspect-[3/4] w-full max-w-[320px] min-[801px]:max-w-[420px]"
-    />
-  );
+  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />;
 };
-
 export default HeroVisual;

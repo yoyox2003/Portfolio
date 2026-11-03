@@ -4,8 +4,16 @@
 
 .dot-grid {
   --dot-grid-spacing: 32px;
+}
+
+.hero-dots {
   background-image: radial-gradient(circle at 16px 16px, rgba(244, 242, 240, 0.18) 1px, transparent 1.5px);
   background-size: var(--dot-grid-spacing) var(--dot-grid-spacing);
+}
+
+.hero-charge-cue { display: none; }
+@media (min-width: 801px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .hero-charge-cue { display: block; }
 }
 
 @custom-variant dark (&:is(.dark *));

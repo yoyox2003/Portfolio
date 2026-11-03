@@ -4,9 +4,9 @@ import Sidebar from "./components/Sidebar";
 
 function App() {
   return (
-    <div data-dot-grid className="dot-grid min-h-screen bg-[#151515] text-[#f4f2f0]">
+    <div className="min-h-screen bg-[#151515] text-[#f4f2f0]">
       <Hero />
-      <div className="min-[801px]:flex min-[801px]:items-start">
+      <div id="portfolio-work" tabIndex={-1} className="min-[801px]:flex min-[801px]:items-start">
         <Sidebar />
         <Content />
       </div>

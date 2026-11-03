@@ -1,9 +1,7 @@
-import myInfo from "@/data/info"
+// import myInfo from "@/data/info"
 
 const Experience = () => {
-  return (
-    <div>Experience</div>
-  )
-}
+  return <div>Experience</div>;
+};
 
-export default Experience
+export default Experience;
