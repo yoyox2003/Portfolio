@@ -2,6 +2,12 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
 
+.dot-grid {
+  --dot-grid-spacing: 32px;
+  background-image: radial-gradient(circle at 16px 16px, rgba(244, 242, 240, 0.18) 1px, transparent 1.5px);
+  background-size: var(--dot-grid-spacing) var(--dot-grid-spacing);
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

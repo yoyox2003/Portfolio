@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import myInfo from "@/data/info";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import HeroVisual from "./HeroVisual";
 
 // Tailwind classes
 const eyebrow = "mb-4 text-xs font-semibold tracking-[0.12em] text-[#b8aaa0] uppercase";
@@ -12,11 +13,11 @@ const Hero = () => {
   const heroRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
-    // This captures the hero element and checks wether it is captured
     const hero = heroRef.current;
     if (!hero) return;
 
-    const context = gsap.context(() => {
+    const media = gsap.matchMedia();
+    media.add("(prefers-reduced-motion: no-preference)", () => {
       const timeline = gsap.timeline({
         scrollTrigger: {
           trigger: hero,
@@ -33,15 +34,15 @@ const Hero = () => {
       });
     }, hero);
 
-    return () => context.revert();
+    return () => media.revert();
   }, []);
 
   return (
     <section ref={heroRef} className="min-h-screen">
-      <div className="hero-content">
+      <div className="hero-content mx-auto flex min-h-screen max-w-[1600px] flex-col items-center justify-center gap-8 px-6 py-14 min-[801px]:flex-row min-[801px]:justify-between min-[801px]:gap-12 min-[801px]:px-9">
         <section
           id="about"
-          className="max-w-[1000px] px-6 pt-[60px] pb-[70px] min-[801px]:px-9 min-[801px]:pt-14 min-[801px]:pb-[90px]"
+          className="w-full max-w-[740px] min-[801px]:min-w-0"
         >
           <p className={eyebrow}>Hello, I'm</p>
           <h1 className="mb-6 text-[clamp(3rem,7vw,6.5rem)] leading-none tracking-[-0.06em]">
@@ -52,6 +53,7 @@ const Hero = () => {
             {myInfo.summary}
           </p>
         </section>
+        <HeroVisual />
       </div>
     </section>
   );

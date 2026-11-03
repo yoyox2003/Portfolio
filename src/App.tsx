@@ -4,7 +4,7 @@ import Sidebar from "./components/Sidebar";
 
 function App() {
   return (
-    <div className="min-h-screen bg-[#151515] text-[#f4f2f0]">
+    <div data-dot-grid className="dot-grid min-h-screen bg-[#151515] text-[#f4f2f0]">
       <Hero />
       <div className="min-[801px]:flex min-[801px]:items-start">
         <Sidebar />
