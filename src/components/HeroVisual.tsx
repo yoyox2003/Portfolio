@@ -18,7 +18,9 @@ const HeroVisual = () => {
     let height = 0;
     let scrollFrame = 0;
     let renderField: ReturnType<typeof createThermalField> = null;
-    const spacing = Number.parseFloat(getComputedStyle(grid).getPropertyValue("--dot-grid-spacing"));
+    const spacing = Number.parseFloat(
+      getComputedStyle(grid).getPropertyValue("--dot-grid-spacing"),
+    );
 
     const draw = () => {
       if (!width || !height || !renderField) return;
@@ -30,8 +32,14 @@ const HeroVisual = () => {
       const offsetX = canvasRect.left - gridRect.left;
       const offsetY = canvasRect.top - gridRect.top;
       // The CSS grid's first dot is half a cell from the background origin.
-      const firstX = spacing / 2 + Math.round((offsetX + width / 2 - spacing / 2) / spacing - 5.5) * spacing - offsetX;
-      const firstY = spacing / 2 + Math.round((offsetY + height / 2 - spacing / 2) / spacing - 7.5) * spacing - offsetY;
+      const firstX =
+        spacing / 2 +
+        Math.round((offsetX + width / 2 - spacing / 2) / spacing - 5.5) * spacing -
+        offsetX;
+      const firstY =
+        spacing / 2 +
+        Math.round((offsetY + height / 2 - spacing / 2) / spacing - 7.5) * spacing -
+        offsetY;
       context.imageSmoothingEnabled = true;
       context.drawImage(renderField(firstX, firstY, phase.value), 0, 0, width, height);
     };
@@ -44,6 +52,7 @@ const HeroVisual = () => {
       paused: true,
       onUpdate: draw,
     });
+
     const updatePlayback = () => {
       if (visible && !document.hidden && !motion.matches) tween.play();
       else tween.pause();
@@ -52,6 +61,7 @@ const HeroVisual = () => {
         draw();
       }
     };
+
     const resizeObserver = new ResizeObserver(([entry]) => {
       width = entry.contentRect.width;
       height = entry.contentRect.height;
@@ -67,6 +77,7 @@ const HeroVisual = () => {
       visible = entry.isIntersecting;
       updatePlayback();
     });
+
     const onScroll = () => {
       if (!visible || document.hidden || scrollFrame) return;
       scrollFrame = requestAnimationFrame(() => {
@@ -74,11 +85,13 @@ const HeroVisual = () => {
         draw();
       });
     };
+
     resizeObserver.observe(canvas);
     intersectionObserver.observe(canvas);
     motion.addEventListener("change", updatePlayback);
     document.addEventListener("visibilitychange", updatePlayback);
     window.addEventListener("scroll", onScroll, { passive: true });
+
     return () => {
       tween.kill();
       resizeObserver.disconnect();

@@ -59,17 +59,30 @@ export function createThermalField(width: number, height: number, spacing: numbe
 
   return (firstX: number, firstY: number, phase: number) => {
     heat.fill(0);
-    const progress = (phase % 1) * stages.length;
-    const stage = Math.floor(progress);
-    const fraction = progress - stage;
-    const mix = fraction * fraction * (3 - 2 * fraction);
-    const from = stages[stage];
-    const to = stages[(stage + 1) % stages.length];
 
     for (let row = 0; row < 16; row++) {
       for (let column = 0; column < 12; column++) {
-        const index = Math.min(row, 15 - row) * 6 + Math.min(column, 11 - column);
-        const intensity = (from[index] + (to[index] - from[index]) * mix) / 9;
+        const mirroredRow = Math.min(row, 15 - row);
+        const mirroredColumn = Math.min(column, 11 - column);
+        const index = mirroredRow * 6 + mirroredColumn;
+        // A small spatial delay lets heat flow across the grid without breaking symmetry.
+        const offset = mirroredRow * 0.006 + mirroredColumn * 0.004;
+        const progress = (((phase - offset) % 1 + 1) % 1) * stages.length;
+        const stage = Math.floor(progress);
+        const t = progress - stage;
+        const previous = stages[(stage + stages.length - 1) % stages.length][index];
+        const from = stages[stage][index];
+        const to = stages[(stage + 1) % stages.length][index];
+        const next = stages[(stage + 2) % stages.length][index];
+        // Periodic Catmull–Rom interpolation carries velocity through each stage
+        // and the loop boundary, instead of easing every dot to a stop together.
+        const value = 0.5 * (
+          2 * from +
+          (to - previous) * t +
+          (2 * previous - 5 * from + 4 * to - next) * t * t +
+          (-previous + 3 * from - 3 * to + next) * t * t * t
+        );
+        const intensity = Math.max(0, value) / 9;
         if (intensity === 0) continue;
         const centerX = Math.round((firstX + column * spacing) * scaleX);
         const centerY = Math.round((firstY + row * spacing) * scaleY);
