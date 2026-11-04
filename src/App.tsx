@@ -1,15 +1,15 @@
-import Content from "./components/Content";
 import Hero from "./components/Hero";
-import Sidebar from "./components/Sidebar";
+import { gsap } from "gsap/gsap-core";
+import { useState } from "react";
+import Portfolio from "./components/Portfolio";
 
 function App() {
+  const [atHero, setAtHero] = useState<boolean>(true);
+
   return (
     <div className="min-h-screen bg-[#151515] text-[#f4f2f0]">
       <Hero />
-      <div id="portfolio-work" tabIndex={-1} className="min-[801px]:flex min-[801px]:items-start">
-        <Sidebar />
-        <Content />
-      </div>
+      <Portfolio />
     </div>
   );
 }
