@@ -18,7 +18,7 @@ const Portfolio = () => {
       className="min-[801px]:flex min-[801px]:items-start"
     >
       {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
-      <Content />
+      {portfolioReady && <Content portfolioRef={portfolioRef} />}
     </div>
   );
 };

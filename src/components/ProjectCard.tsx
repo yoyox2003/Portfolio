@@ -30,7 +30,7 @@ type ProjectCardProps = {
 
 const ProjectCard = ({ title, description, color }: ProjectCardProps) => {
   return (
-    <article className="overflow-hidden rounded-[28px] bg-[#262422]">
+    <article className="content-animation overflow-hidden rounded-[28px] bg-[#262422]">
       <div
         className={`grid min-h-[220px] place-items-center text-[0.8rem] font-semibold tracking-[0.08em] text-[#292536] uppercase min-[561px]:min-h-[270px] ${color}`}
         aria-hidden="true"

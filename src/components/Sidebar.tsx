@@ -34,9 +34,9 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
             trigger: portfolio,
             start: "top 90%",
             end: "top top",
-            markers: true,
             toggleActions: "play none none reverse",
             scrub: 0.5,
+            // markers: true,
           },
         },
       );
