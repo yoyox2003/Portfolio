@@ -15,7 +15,7 @@ const Portfolio = () => {
       ref={attachPortfolio}
       id="portfolio-work"
       tabIndex={-1}
-      className="min-[801px]:flex min-[801px]:items-start"
+      className="overflow-x-clip min-[801px]:flex min-[801px]:items-start"
     >
       {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
       {portfolioReady && <Content portfolioRef={portfolioRef} />}

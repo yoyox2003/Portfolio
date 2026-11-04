@@ -21,28 +21,31 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
     const sidebar = sidebarRef.current;
     if (!sidebar) return;
 
-    const context = gsap.context(() => {
-      gsap.fromTo(
-        ".sidebar-item",
-        { x: -window.innerWidth },
-        {
-          x: 0,
-          duration: 1,
-          stagger: 0.15,
-          ease: "power2.out",
-          scrollTrigger: {
-            trigger: portfolio,
-            start: "top 90%",
-            end: "top top",
-            toggleActions: "play none none reverse",
-            scrub: 0.5,
-            // markers: true,
+    const media = gsap.matchMedia();
+    media.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        gsap.fromTo(
+          ".sidebar-item",
+          { x: -window.innerWidth },
+          {
+            x: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: portfolio,
+              start: "top 90%",
+              end: "top top",
+              scrub: 0.5,
+            },
           },
-        },
-      );
-    }, portfolio);
+        );
+      },
+      portfolio,
+    );
 
-    return () => context.revert();
+    return () => media.revert();
   }, [portfolioRef, sidebarRef]);
 
   return (
@@ -69,7 +72,7 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
             About
           </a>
           <a className={linkStyle + " sidebar-item inline-block"} href="#projects">
-            Projects
+            Skills
           </a>
           <a className={linkStyle + " sidebar-item inline-block"} href="#contact">
             Contact

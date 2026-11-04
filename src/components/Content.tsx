@@ -23,7 +23,9 @@ const Content = ({ portfolioRef }: contentProps) => {
     const portfolio = portfolioRef.current;
     if (!portfolio) return;
 
-    const ctx = gsap.context(() => {
+    const media = gsap.matchMedia();
+    media.add({ mobile: "(max-width: 800px)", desktop: "(min-width: 801px)", motion: "(prefers-reduced-motion: no-preference)" }, (context) => {
+      if (!context.conditions?.motion) return;
       gsap.fromTo(
         ".content-animation",
         { x: +window.innerWidth },
@@ -33,18 +35,16 @@ const Content = ({ portfolioRef }: contentProps) => {
           stagger: 0.15,
           ease: "power2.out",
           scrollTrigger: {
-            trigger: portfolio,
+            trigger: context.conditions.mobile ? content : portfolio,
             start: "top 90%",
             end: "top top",
-            toggleActions: "play none none reverse",
             scrub: 2,
-            markers: true,
           },
         },
       );
     }, portfolio);
 
-    return () => ctx.revert();
+    return () => media.revert();
   }, [contentRef, portfolioRef]);
 
   return (
