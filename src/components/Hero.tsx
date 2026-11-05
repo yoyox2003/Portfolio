@@ -70,7 +70,7 @@ const Hero = () => {
     <section
       ref={heroRef}
       data-dot-grid
-      className="dot-grid relative isolate min-h-screen overflow-clip"
+      className="dot-grid relative isolate min-h-screen overflow-clip snap-start"
     >
       <div aria-hidden="true" className="hero-dots pointer-events-none absolute inset-0" />
       <div className="relative z-20">

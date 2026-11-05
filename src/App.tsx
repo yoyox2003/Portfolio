@@ -1,6 +1,5 @@
 import Hero from "./components/Hero";
-import { gsap } from "gsap/gsap-core";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Portfolio from "./components/Portfolio";
 
 function App() {
