@@ -41,9 +41,13 @@ const HeroVisual = ({ originRef, controllerRef }: HeroVisualProps) => {
       context.clearRect(0, 0, width, height);
       const firstX = spacing / 2 + Math.round((centerX - spacing / 2) / spacing - 5.5) * spacing;
       const firstY = spacing / 2 + Math.round((centerY - spacing / 2) / spacing - 7.5) * spacing;
+      // Fit the complete field, including its glow, into the responsive visual slot.
+      const scale = Math.min(slotWidth / idleBounds.width, slotHeight / idleBounds.height);
+      const drawnWidth = idleBounds.width * scale;
+      const drawnHeight = idleBounds.height * scale;
       context.drawImage(
         renderIdle(firstX - idleBounds.x, firstY - idleBounds.y, phase.value, charge),
-        idleBounds.x, idleBounds.y, idleBounds.width, idleBounds.height,
+        centerX - drawnWidth / 2, centerY - drawnHeight / 2, drawnWidth, drawnHeight,
       );
 
     };

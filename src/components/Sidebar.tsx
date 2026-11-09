@@ -51,22 +51,22 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
   return (
     <aside
       ref={sidebarRef}
-      className="flex flex-col justify-between px-6 py-7 min-[801px]:sticky min-[801px]:top-0 min-[801px]:h-screen min-[801px]:w-[260px] min-[801px]:shrink-0 min-[801px]:px-9 min-[801px]:py-[42px]"
+      className="flex flex-col justify-between px-[5vw] py-[1.75em] text-[max(1rem,1vw)] min-[801px]:sticky min-[801px]:top-0 min-[801px]:h-screen min-[801px]:w-[max(13rem,20%)] min-[801px]:shrink-0 min-[801px]:px-[3vw] min-[801px]:py-[2.625em]"
     >
       <div>
         <p
-          className={`${linkStyle} sidebar-item text-xl font-bold cursor-pointer transition-colors duration-150`}
+          className={`${linkStyle} sidebar-item text-[1.25em] font-bold cursor-pointer transition-colors duration-150`}
         >
           {myInfo.name.first + " " + myInfo.name.second}
         </p>
-        <p className="mt-[14px] sidebar-item mb-5 leading-[1.6] text-[#aaa6a3] min-[801px]:mb-8">
+        <p className="mt-[0.875em] sidebar-item mb-[1.25em] leading-[1.6] text-[#aaa6a3] min-[801px]:mb-[2em]">
           {myInfo.title}
           <br />
           {myInfo.location}
         </p>
         <nav
           aria-label="Main navigation"
-          className="flex flex-wrap gap-5 min-[801px]:flex-col min-[801px]:items-start min-[801px]:gap-4"
+          className="flex flex-wrap gap-[1.25em] min-[801px]:flex-col min-[801px]:items-start min-[801px]:gap-[1em]"
         >
           <a className={linkStyle + " sidebar-item inline-block"} href="#about">
             About
@@ -79,7 +79,7 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
           </a>
         </nav>
       </div>
-      <p className="hidden text-[0.8rem] leading-[1.6] text-[#aaa6a3] min-[801px]:block">
+      <p className="hidden text-[0.8em] leading-[1.6] text-[#aaa6a3] min-[801px]:block">
         A portfolio in progress.
       </p>
     </aside>

@@ -31,6 +31,8 @@ const Portfolio = () => {
     let touchReady = false;
     let previousOverflow = "";
     let locked = false;
+    let hasEnteredPortfolio = false;
+    let returningToHero = false;
 
     const portfolioTop = () => window.scrollY + portfolio.getBoundingClientRect().top;
     const alignPortfolio = () => {
@@ -50,10 +52,23 @@ const Portfolio = () => {
       window.clearTimeout(promptTimer);
       promptTimer = window.setTimeout(() => setExitVisible(false), 2000);
     };
-    // Momentum and browser scroll restoration must not move the locked boundary.
+    // Native snapping can land exactly at the boundary without firing onEnter.
     const onScroll = () => {
-      if (locked && Math.abs(portfolio.getBoundingClientRect().top) > 0.5) {
-        alignPortfolio();
+      const top = portfolio.getBoundingClientRect().top;
+      if (locked) {
+        if (Math.abs(top) > 0.5) alignPortfolio();
+        return;
+      }
+      if (returningToHero) {
+        // Keep the confirmed exit free until it has crossed into the hero.
+        if (top > 1) returningToHero = false;
+        return;
+      }
+      if (top <= 1) {
+        hasEnteredPortfolio = true;
+        exitRef.current = false;
+      } else if (hasEnteredPortfolio) {
+        lockAtPortfolio();
       }
     };
 
@@ -68,6 +83,8 @@ const Portfolio = () => {
     };
 
     const leaveForHero = () => {
+      returningToHero = true;
+      hasEnteredPortfolio = false;
       unlock(true);
       document.documentElement.classList.add("snap-y", "snap-proximity");
       document.querySelector("[data-dot-grid]")?.scrollIntoView({
@@ -119,7 +136,8 @@ const Portfolio = () => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!locked) return;
       if (event.repeat) {
-        if (["ArrowUp", "PageUp", "Home", "ArrowDown", "PageDown", "End", " "].includes(event.key)) event.preventDefault();
+        if (["ArrowUp", "PageUp", "Home", "ArrowDown", "PageDown", "End", " "].includes(event.key))
+          event.preventDefault();
         return;
       }
       if (["ArrowUp", "PageUp", "Home"].includes(event.key)) {
@@ -142,7 +160,10 @@ const Portfolio = () => {
       trigger: portfolioRef.current,
       start: "top top",
       onEnter: () => {
-        if (!locked) exitRef.current = false;
+        if (!locked && !returningToHero) {
+          hasEnteredPortfolio = true;
+          exitRef.current = false;
+        }
         window.clearTimeout(snapTimer);
         snapTimer = window.setTimeout(() => {
           document.documentElement.classList.remove("snap-y", "snap-proximity");
@@ -150,6 +171,7 @@ const Portfolio = () => {
       },
       onLeaveBack: lockAtPortfolio,
     });
+    onScroll();
 
     return () => {
       window.clearTimeout(snapTimer);
@@ -174,9 +196,7 @@ const Portfolio = () => {
       tabIndex={-1}
       className="overflow-x-clip min-[801px]:flex min-[801px]:items-start snap-start snap-always"
     >
-      <AnimatePresence>
-        {exitVisible && <ExitPrompt key="exit-prompt" />}
-      </AnimatePresence>
+      <AnimatePresence>{exitVisible && <ExitPrompt key="exit-prompt" />}</AnimatePresence>
       {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
       {portfolioReady && <Content portfolioRef={portfolioRef} />}
     </div>

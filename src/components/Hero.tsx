@@ -74,21 +74,21 @@ const Hero = () => {
     >
       <div aria-hidden="true" className="hero-dots pointer-events-none absolute inset-0" />
       <div className="relative z-20">
-        <div className="hero-content mx-auto flex min-h-screen max-w-[1600px] flex-col items-center justify-center gap-8 px-6 py-14 min-[801px]:flex-row min-[801px]:justify-between min-[801px]:gap-12 min-[801px]:px-9">
-          <section id="about" className="w-full max-w-[740px] min-[801px]:min-w-0">
-            <p className="mb-4 text-xs font-semibold tracking-[0.12em] text-[#b8aaa0] uppercase">
+        <div className="hero-content flex min-h-screen w-full flex-col items-center justify-center gap-[8vw] px-[5vw] pt-[6vw] pb-[10vw] text-[max(1rem,1vw)] min-[801px]:flex-row min-[801px]:gap-[4vw]">
+          <section id="about" className="w-full min-[801px]:min-w-0 min-[801px]:flex-1">
+            <p className="mb-[1.33em] text-[0.75em] font-semibold tracking-[0.12em] text-[#b8aaa0] uppercase">
               Hello, I'm
             </p>
-            <h1 className="mb-6 text-[clamp(3rem,7vw,6.5rem)] leading-none tracking-[-0.06em]">
+            <h1 className="mb-[0.3em] text-[max(2.5rem,9vw)] leading-none tracking-[-0.06em] min-[801px]:text-[5.5vw]">
               {`${myInfo.name.first} ${myInfo.name.second}`}
               <span className="text-[#b7a0f5]">.</span>
             </h1>
-            <p className="max-w-[550px] text-[clamp(1.1rem,2vw,1.4rem)] leading-[1.6] text-[#c1bdb9]">
+            <p className="text-[max(1.1rem,1.4vw)] leading-[1.6] text-[#c1bdb9]">
               {myInfo.summary}
             </p>
             <a
               href="#portfolio-work"
-              className="mt-8 inline-block rounded-sm font-semibold text-[#cbbcff] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+              className="mt-[2em] inline-block rounded-sm font-semibold text-[#cbbcff] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
             >
               View projects <span aria-hidden="true">↗</span>
             </a>
@@ -108,7 +108,7 @@ const Hero = () => {
           <div
             ref={originRef}
             aria-hidden="true"
-            className="aspect-[3/4] w-full max-w-[320px] shrink-0 min-[801px]:max-w-[420px]"
+            className="aspect-[3/4] w-[80%] shrink-0 min-[801px]:w-[36%]"
           />
         </div>
       </div>
