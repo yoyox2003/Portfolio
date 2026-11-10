@@ -69,7 +69,7 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
           className="flex flex-wrap gap-[1.25em] min-[801px]:flex-col min-[801px]:items-start min-[801px]:gap-[1em]"
         >
           <a className={linkStyle + " sidebar-item inline-block"} href="#about">
-            About
+            Experience
           </a>
           <a className={linkStyle + " sidebar-item inline-block"} href="#projects">
             Skills
@@ -79,9 +79,7 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
           </a>
         </nav>
       </div>
-      <p className="hidden text-[0.8em] leading-[1.6] text-[#aaa6a3] min-[801px]:block">
-        A portfolio in progress.
-      </p>
+      <p className="hidden text-[0.8em] leading-[1.6] text-[#aaa6a3] min-[801px]:block">:)</p>
     </aside>
   );
 };
