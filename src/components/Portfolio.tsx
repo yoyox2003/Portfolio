@@ -50,7 +50,7 @@ const Portfolio = () => {
       alignPortfolio();
       setExitVisible(true);
       window.clearTimeout(promptTimer);
-      promptTimer = window.setTimeout(() => setExitVisible(false), 2000);
+      promptTimer = window.setTimeout(() => unlock(), 2000);
     };
     // Native snapping can land exactly at the boundary without firing onEnter.
     const onScroll = () => {
