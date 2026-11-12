@@ -22,7 +22,9 @@ const HeroVisual = ({ originRef, controllerRef }: HeroVisualProps) => {
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const phase = { value: 0 };
-    const spacing = Number.parseFloat(getComputedStyle(hero).getPropertyValue("--dot-grid-spacing"));
+    const spacing = Number.parseFloat(
+      getComputedStyle(hero).getPropertyValue("--dot-grid-spacing"),
+    );
     let charge = 0;
     let visible = false;
     let width = 0;
@@ -47,11 +49,20 @@ const HeroVisual = ({ originRef, controllerRef }: HeroVisualProps) => {
       const drawnHeight = idleBounds.height * scale;
       context.drawImage(
         renderIdle(firstX - idleBounds.x, firstY - idleBounds.y, phase.value, charge),
-        centerX - drawnWidth / 2, centerY - drawnHeight / 2, drawnWidth, drawnHeight,
+        centerX - drawnWidth / 2,
+        centerY - drawnHeight / 2,
+        drawnWidth,
+        drawnHeight,
       );
-
     };
-    const tween = gsap.to(phase, { value: 1, duration: 5, ease: "none", repeat: -1, paused: true, onUpdate: draw });
+    const tween = gsap.to(phase, {
+      value: 1,
+      duration: 5,
+      ease: "none",
+      repeat: -1,
+      paused: true,
+      onUpdate: draw,
+    });
     const updatePlayback = () => {
       if (visible && !document.hidden && !motion.matches) tween.play();
       else tween.pause();
@@ -114,6 +125,12 @@ const HeroVisual = ({ originRef, controllerRef }: HeroVisualProps) => {
     };
   }, [controllerRef, originRef]);
 
-  return <canvas ref={canvasRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 z-10 h-full w-full"
+    />
+  );
 };
 export default HeroVisual;
