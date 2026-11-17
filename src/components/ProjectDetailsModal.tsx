@@ -15,6 +15,56 @@ const actionStyle =
   "inline-flex items-center justify-center rounded-lg border border-[#cbbcff]/40 px-4 py-2 font-medium text-[#cbbcff] transition-colors hover:bg-[#cbbcff]/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cbbcff]";
 const sectionHeading = "mb-4 text-xl font-semibold text-[#f4f2f0]";
 
+const PhotoViewer = ({
+  src,
+  projectName,
+  index,
+}: {
+  src: string;
+  projectName: string;
+  index: number;
+}) => {
+  return (
+    <Dialog.Root>
+      <Dialog.Trigger
+        aria-label={`Enlarge ${projectName} screenshot ${index + 1}`}
+        className="cursor-zoom-in overflow-hidden rounded-lg bg-black/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cbbcff]"
+      >
+        <img
+          src={src}
+          alt={`${projectName} interface screenshot ${index + 1}`}
+          loading="lazy"
+          className="aspect-video w-full object-contain"
+        />
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Backdrop
+          forceRender
+          className="fixed inset-0 z-[60] cursor-zoom-out bg-black/90 opacity-100 transition-opacity duration-300 ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 motion-reduce:transition-none"
+        />
+        <Dialog.Popup className="fixed inset-0 z-[60] m-auto flex h-fit max-h-[94dvh] w-fit max-w-[min(96rem,calc(100%-2rem))] flex-col overflow-hidden rounded-xl border border-white/10 bg-[#151515] text-[#f4f2f0] shadow-2xl outline-none transition-[opacity,scale] duration-300 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 motion-reduce:transition-none motion-reduce:data-[starting-style]:scale-100 motion-reduce:data-[ending-style]:scale-100">
+          <header className="flex shrink-0 items-center justify-between gap-4 px-4 py-3">
+            <Dialog.Title className="text-sm font-medium">
+              {projectName} — Screenshot {index + 1}
+            </Dialog.Title>
+            <Dialog.Close
+              aria-label="Close enlarged photo"
+              className="shrink-0 cursor-pointer rounded-lg p-2 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-[#cbbcff]"
+            >
+              <X aria-hidden="true" size={22} />
+            </Dialog.Close>
+          </header>
+          <img
+            src={src}
+            alt={`${projectName} interface screenshot ${index + 1}`}
+            className="mx-auto block h-auto max-h-[calc(94dvh-5rem)] w-auto max-w-full object-contain"
+          />
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
+  );
+};
+
 const DetailsList = ({ title, items }: { title: string; items?: string[] }) => {
   if (!items?.length) return null;
 
@@ -22,7 +72,9 @@ const DetailsList = ({ title, items }: { title: string; items?: string[] }) => {
     <section>
       <h3 className={sectionHeading}>{title}</h3>
       <ul className="list-disc space-y-3 pl-5 leading-relaxed text-[#c1bdb9] marker:text-[#b7a0f5]">
-        {items.map((item) => <li key={item}>{item}</li>)}
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
       </ul>
     </section>
   );
@@ -35,16 +87,20 @@ const ProjectDetailsModal = ({
   onCloseComplete,
   triggerRef,
 }: ProjectDetailsModalProps) => {
-  const photos = [...new Set(
-    [project?.assets.photo.preview, ...(project?.assets.photo.screenshots ?? [])]
-      .filter((src): src is string => Boolean(src)),
-  )];
+  const photos = [
+    ...new Set(
+      [project?.assets.photo.preview, ...(project?.assets.photo.screenshots ?? [])].filter(
+        (src): src is string => Boolean(src),
+      ),
+    ),
+  ];
   const videoCandidates = [
     { label: "Demo", src: project?.assets.video.demo },
     { label: "Additional walkthrough", src: project?.assets.video.specific },
   ];
-  const videos = videoCandidates.filter((video, index, all) =>
-    video.src && all.findIndex((candidate) => candidate.src === video.src) === index,
+  const videos = videoCandidates.filter(
+    (video, index, all) =>
+      video.src && all.findIndex((candidate) => candidate.src === video.src) === index,
   );
 
   return (
@@ -66,28 +122,57 @@ const ProjectDetailsModal = ({
               <header className="flex shrink-0 items-start justify-between gap-4 border-b border-white/10 px-5 py-4 sm:px-8">
                 <div className="min-w-0">
                   <p className="mb-1 text-sm text-[#b8aaa0]">{project.context}</p>
-                  <Dialog.Title className="text-2xl font-semibold sm:text-3xl">{project.name}</Dialog.Title>
+                  <Dialog.Title className="text-2xl font-semibold sm:text-3xl">
+                    {project.name}
+                  </Dialog.Title>
                 </div>
-                <Dialog.Close aria-label="Close project details" className="shrink-0 cursor-pointer rounded-lg p-2 text-[#c1bdb9] hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-[#cbbcff]">
+                <Dialog.Close
+                  aria-label="Close project details"
+                  className="shrink-0 cursor-pointer rounded-lg p-2 text-[#c1bdb9] hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-[#cbbcff]"
+                >
                   <X aria-hidden="true" size={22} />
                 </Dialog.Close>
               </header>
               <div className="min-h-0 space-y-8 overflow-y-auto overscroll-contain px-5 py-6 sm:px-8 sm:py-8">
-                <Dialog.Description className="leading-relaxed text-[#c1bdb9]">{project.description}</Dialog.Description>
+                <Dialog.Description className="leading-relaxed text-[#c1bdb9]">
+                  {project.description}
+                </Dialog.Description>
                 <div>
                   <div className="flex flex-wrap gap-3">
                     {project.repository && (
-                      <a className={actionStyle} href={project.repository} target="_blank" rel="noreferrer">GitHub</a>
+                      <a
+                        className={actionStyle}
+                        href={project.repository}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        GitHub
+                      </a>
                     )}
                     {project.deployment.status === "live" ? (
-                      <a className={actionStyle} href={project.deployment.url} target="_blank" rel="noreferrer">Visit website</a>
+                      <a
+                        className={actionStyle}
+                        href={project.deployment.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Visit website
+                      </a>
                     ) : (
-                      <button type="button" disabled className="cursor-not-allowed rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-medium text-[#aaa6a3]">Visit website</button>
+                      <button
+                        type="button"
+                        disabled
+                        className="cursor-not-allowed rounded-lg border border-white/10 bg-white/5 px-4 py-2 font-medium text-[#aaa6a3]"
+                      >
+                        Visit website
+                      </button>
                     )}
                   </div>
                   {project.deployment.status !== "live" && (
                     <p className="mt-3 text-sm text-[#aaa6a3]">
-                      {project.deployment.status === "unavailable" ? "Deployment currently unavailable" : "Not deployed"}
+                      {project.deployment.status === "unavailable"
+                        ? "Deployment currently unavailable"
+                        : "Not deployed"}
                     </p>
                   )}
                 </div>
@@ -95,7 +180,12 @@ const ProjectDetailsModal = ({
                   <h3 className={sectionHeading}>Technologies</h3>
                   <ul className="flex flex-wrap gap-2">
                     {project.technologies.map((technology) => (
-                      <li key={technology} className="rounded-md bg-[#b7a0f5]/10 px-3 py-1.5 text-sm text-[#cbbcff]">{technology}</li>
+                      <li
+                        key={technology}
+                        className="rounded-md bg-[#b7a0f5]/10 px-3 py-1.5 text-sm text-[#cbbcff]"
+                      >
+                        {technology}
+                      </li>
                     ))}
                   </ul>
                 </section>
@@ -115,8 +205,17 @@ const ProjectDetailsModal = ({
                     <div className="space-y-6">
                       {videos.map((video) => (
                         <figure key={video.src}>
-                          <figcaption className="mb-2 text-sm text-[#c1bdb9]">{video.label}</figcaption>
-                          <video aria-label={`${project.name} ${video.label}`} src={video.src ?? undefined} controls playsInline preload="metadata" className="aspect-video w-full rounded-lg bg-black object-contain" />
+                          <figcaption className="mb-2 text-sm text-[#c1bdb9]">
+                            {video.label}
+                          </figcaption>
+                          <video
+                            aria-label={`${project.name} ${video.label}`}
+                            src={video.src ?? undefined}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="aspect-video w-full rounded-lg bg-black object-contain"
+                          />
                         </figure>
                       ))}
                     </div>
@@ -127,28 +226,7 @@ const ProjectDetailsModal = ({
                     <h3 className={sectionHeading}>Photos</h3>
                     <div className="grid gap-4 sm:grid-cols-2">
                       {photos.map((src, index) => (
-                        <Dialog.Root key={src}>
-                          <Dialog.Trigger
-                            aria-label={`Enlarge ${project.name} screenshot ${index + 1}`}
-                            className="cursor-zoom-in overflow-hidden rounded-lg bg-black/20 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cbbcff]"
-                          >
-                            <img src={src} alt={`${project.name} interface screenshot ${index + 1}`} loading="lazy" className="aspect-video w-full object-contain" />
-                          </Dialog.Trigger>
-                          <Dialog.Portal>
-                            <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/90 opacity-100 transition-opacity duration-300 ease-out data-[starting-style]:opacity-0 data-[ending-style]:opacity-0 motion-reduce:transition-none" />
-                            <Dialog.Popup className="fixed top-1/2 left-1/2 z-[60] flex max-h-[94dvh] w-[calc(100%-2rem)] max-w-[96rem] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-xl border border-white/10 bg-[#151515] text-[#f4f2f0] shadow-2xl outline-none transition-[opacity,scale] duration-300 ease-out data-[starting-style]:scale-95 data-[starting-style]:opacity-0 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 motion-reduce:transition-none motion-reduce:data-[starting-style]:scale-100 motion-reduce:data-[ending-style]:scale-100">
-                              <header className="flex shrink-0 items-center justify-between gap-4 px-4 py-3">
-                                <Dialog.Title className="text-sm font-medium">
-                                  {project.name} — Screenshot {index + 1}
-                                </Dialog.Title>
-                                <Dialog.Close aria-label="Close enlarged photo" className="shrink-0 cursor-pointer rounded-lg p-2 hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-[#cbbcff]">
-                                  <X aria-hidden="true" size={22} />
-                                </Dialog.Close>
-                              </header>
-                              <img src={src} alt={`${project.name} interface screenshot ${index + 1}`} className="min-h-0 w-full flex-1 object-contain pb-4" />
-                            </Dialog.Popup>
-                          </Dialog.Portal>
-                        </Dialog.Root>
+                        <PhotoViewer key={src} src={src} projectName={project.name} index={index} />
                       ))}
                     </div>
                   </section>
