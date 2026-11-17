@@ -1,3 +1,5 @@
+import type { Project } from "./project";
+
 // Nour Alma'rifa Imports
 import nourPreviewLoop from "../assets/projects/nour alma'rifa/videos/Preview Loop.mp4";
 import nourDemo from "../assets/projects/nour alma'rifa/videos/Main Page(With Audio).mp4";
@@ -25,7 +27,7 @@ import catHard from "../assets/projects/the cat memory game/photos/cats-hard.png
 import catHardHidden from "../assets/projects/the cat memory game/photos/hidden-cats-hard.png";
 import catStartPage from "../assets/projects/the cat memory game/photos/start-page.png";
 
-const projects = [
+const projects: Project[] = [
   {
     textOnly: false,
     name: "Voodoo",
@@ -50,6 +52,7 @@ const projects = [
       "Clerk Express",
     ],
     repository: "https://github.com/yoyox2003/Voodoo",
+    deployment: { status: "unavailable", url: null },
     assets: {
       video: {
         preview_loop: voodooPreviewLoop,
@@ -93,6 +96,7 @@ const projects = [
     ],
     technologies: ["Python", "LLVM", "LLVM IR", "Large Language Models", "Reinforcement Learning"],
     repository: "https://github.com/Abdo12KM/autocompile",
+    deployment: { status: "not-deployed", url: null },
     thesis: "AutoCompile: Tool-Free LLM Prediction of LLVM Optimization Pass Sequences",
     authors: [
       "Abdallah Mohamed",
@@ -134,6 +138,7 @@ const projects = [
       "Vercel",
     ],
     repository: "https://github.com/Abdo12KM/nour-alma3refa",
+    deployment: { status: "not-deployed", url: null },
     assets: {
       video: {
         preview_loop: nourPreviewLoop,
@@ -178,6 +183,10 @@ const projects = [
       "Bootstrap Icons",
     ],
     repository: "https://github.com/yoyox2003/the-cat-memory-game",
+    deployment: {
+      status: "live",
+      url: "https://yoyox2003.github.io/the-cat-memory-game/",
+    },
     assets: {
       video: {
         preview_loop: catDemo,

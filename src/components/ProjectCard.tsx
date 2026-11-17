@@ -2,35 +2,16 @@ import { useRef, type PointerEvent } from "react";
 import Link from "./ui/Link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import type { Project } from "@/data/project";
 
-type ProjectCardProps = {
-  textOnly: boolean;
-  name: string;
-  context: string;
-  description: string;
-  technologies: string[];
-  repository: string;
-  features?: string[];
-  assets: {
-    video: {
-      preview_loop: string | null;
-      demo: string | null;
-      specific: string | null;
-    };
-    photo: {
-      preview: string | null;
-      screenshots: string[];
-    };
-  };
-  contributions?: string[];
-  researchDetails?: string[];
-  authors?: string[];
+type ProjectCardProps = Project & {
+  onOpen: (trigger: HTMLButtonElement) => void;
 };
 
-const ProjectCard = ({ name, assets, description, repository, textOnly }: ProjectCardProps) => {
+const ProjectCard = ({ name, assets, description, repository, textOnly, onOpen }: ProjectCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const handlePointerEnter = (event: PointerEvent<HTMLDivElement>) => {
+  const handlePointerEnter = (event: PointerEvent<HTMLElement>) => {
     if (
       event.pointerType === "touch" ||
       !window.matchMedia("(hover: hover)").matches ||
@@ -48,13 +29,15 @@ const ProjectCard = ({ name, assets, description, repository, textOnly }: Projec
   };
 
   return (
-    <article className="content-animation w-full min-w-0 overflow-hidden rounded-[1em] bg-[#262422]  border-cyan-950">
+    <article
+      className="content-animation relative w-full min-w-0 overflow-hidden rounded-[1em] bg-[#262422]"
+      onPointerEnter={handlePointerEnter}
+      onPointerLeave={handlePointerLeave}
+    >
       {!textOnly && (
         <div
           className="grid aspect-video place-items-center overflow-hidden text-[0.8em] font-semibold tracking-[0.08em] text-[#c0bccb] uppercase"
           aria-hidden="true"
-          onPointerEnter={handlePointerEnter}
-          onPointerLeave={handlePointerLeave}
         >
           {assets.video.preview_loop ? (
             <video
@@ -76,12 +59,24 @@ const ProjectCard = ({ name, assets, description, repository, textOnly }: Projec
       <div className="px-[1.75em] pt-[1.625em] pb-[1.875em]">
         <div className="mb-[0.5em] flex items-center gap-2">
           <h3 className="text-[1.25em]">{name}</h3>
-          <Link href={repository} ariaLabel="Go to project GitHub page">
-            <FontAwesomeIcon icon={faGithub} aria-hidden="true" className="size-6!" />
-          </Link>
+          <div className="relative z-20">
+            <Link href={repository} ariaLabel={`View ${name} on GitHub`}>
+              <FontAwesomeIcon icon={faGithub} aria-hidden="true" className="size-6!" />
+            </Link>
+          </div>
         </div>
         <p className="leading-[1.6] text-[#c1bdb9]">{description}</p>
       </div>
+      <button
+        type="button"
+        className="absolute inset-0 z-10 cursor-pointer rounded-[inherit] focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[#cbbcff]"
+        aria-label={`View details for ${name}`}
+        aria-haspopup="dialog"
+        onClick={(event) => {
+          videoRef.current?.pause();
+          onOpen(event.currentTarget);
+        }}
+      />
     </article>
   );
 };

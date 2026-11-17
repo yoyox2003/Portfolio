@@ -19,10 +19,15 @@ const Portfolio = () => {
   // Exit Prompt
   const [exitVisible, setExitVisible] = useState<boolean>(false);
   const exitRef = useRef(false);
+  const [projectDialogOpen, setProjectDialogOpen] = useState(false);
+  const handleProjectDialogChange = useCallback((open: boolean) => {
+    setProjectDialogOpen(open);
+    if (open) setExitVisible(false);
+  }, []);
 
   useLayoutEffect(() => {
     const portfolio = portfolioRef.current;
-    if (!portfolioReady || !portfolio) return;
+    if (!portfolioReady || !portfolio || projectDialogOpen) return;
     let snapTimer: number | undefined;
     let wheelTimer: number | undefined;
     let promptTimer: number | undefined;
@@ -187,7 +192,7 @@ const Portfolio = () => {
       window.removeEventListener("scroll", onScroll);
       trigger.kill();
     };
-  }, [portfolioReady]);
+  }, [portfolioReady, projectDialogOpen]);
 
   return (
     <div
@@ -198,7 +203,9 @@ const Portfolio = () => {
     >
       <AnimatePresence>{exitVisible && <ExitPrompt key="exit-prompt" />}</AnimatePresence>
       {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
-      {portfolioReady && <Content portfolioRef={portfolioRef} />}
+      {portfolioReady && (
+        <Content portfolioRef={portfolioRef} onProjectDialogChange={handleProjectDialogChange} />
+      )}
     </div>
   );
 };

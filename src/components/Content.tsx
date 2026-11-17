@@ -12,9 +12,10 @@ const heading = "text-[2em] tracking-[-0.03em]";
 
 type contentProps = {
   portfolioRef: RefObject<HTMLDivElement | null>;
+  onProjectDialogChange: (open: boolean) => void;
 };
 
-const Content = ({ portfolioRef }: contentProps) => {
+const Content = ({ portfolioRef, onProjectDialogChange }: contentProps) => {
   const contentRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -72,7 +73,7 @@ const Content = ({ portfolioRef }: contentProps) => {
             Selected projects / Examples
           </p>
         </div>
-        <Projects />
+        <Projects onDialogChange={onProjectDialogChange} />
       </section>
 
       <Contact />
