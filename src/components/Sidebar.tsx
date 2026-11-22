@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef, type RefObject } from "react";
 import myInfo from "@/data/info";
 import { gsap } from "gsap/gsap-core";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import type { PortfolioView } from "./Content";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -10,9 +11,12 @@ const linkStyle =
 
 type sidebarProps = {
   portfolioRef: RefObject<HTMLDivElement | null>;
+  activeView: PortfolioView;
+  onViewChange: (view: PortfolioView) => void;
+  onContactNavigate: () => void;
 };
 
-const Sidebar = ({ portfolioRef }: sidebarProps) => {
+const Sidebar = ({ portfolioRef, activeView, onViewChange, onContactNavigate }: sidebarProps) => {
   const sidebarRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -68,13 +72,41 @@ const Sidebar = ({ portfolioRef }: sidebarProps) => {
           aria-label="Main navigation"
           className="flex flex-wrap gap-[1.25em] min-[801px]:flex-col min-[801px]:items-start min-[801px]:gap-[1em]"
         >
-          <a className={linkStyle + " sidebar-item inline-block"} href="#about">
+          <button
+            type="button"
+            className={linkStyle + " sidebar-item cursor-pointer aria-pressed:text-[#cbbcff] aria-pressed:underline aria-pressed:underline-offset-4"}
+            aria-pressed={activeView === "projects"}
+            aria-controls="portfolio-view"
+            onClick={() => onViewChange("projects")}
+          >
+            Projects
+          </button>
+          <button
+            type="button"
+            className={linkStyle + " sidebar-item cursor-pointer aria-pressed:text-[#cbbcff] aria-pressed:underline aria-pressed:underline-offset-4"}
+            aria-pressed={activeView === "experience"}
+            aria-controls="portfolio-view"
+            onClick={() => onViewChange("experience")}
+          >
             Experience
-          </a>
-          <a className={linkStyle + " sidebar-item inline-block"} href="#projects">
+          </button>
+          <button
+            type="button"
+            className={linkStyle + " sidebar-item cursor-pointer aria-pressed:text-[#cbbcff] aria-pressed:underline aria-pressed:underline-offset-4"}
+            aria-pressed={activeView === "skills"}
+            aria-controls="portfolio-view"
+            onClick={() => onViewChange("skills")}
+          >
             Skills
-          </a>
-          <a className={linkStyle + " sidebar-item inline-block"} href="#contact">
+          </button>
+          <a
+            className={linkStyle + " sidebar-item inline-block"}
+            href="#contact"
+            onClick={(event) => {
+              if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+              onContactNavigate();
+            }}
+          >
             Contact
           </a>
         </nav>

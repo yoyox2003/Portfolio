@@ -61,7 +61,7 @@ const Contact = () => {
         </Link>
         <button
           type="button"
-          className="rounded-sm hover:text-[#cbbcff] transition-colors text-[#f4f2f0] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cbbcff] duration-150"
+          className="rounded-sm hover:text-[#cbbcff] transition-colors text-[#f4f2f0] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#cbbcff] duration-150 cursor-pointer"
           aria-label="Copy my Email"
           onClick={copyHandler}
         >

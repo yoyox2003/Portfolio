@@ -27,7 +27,7 @@ const myInfo = {
   skills: {
     languages: ["C++", "Java", "Python", "JavaScript", "TypeScript"],
     frontend: ["React", "HTML", "CSS"],
-    toolsAndDatabases: ["Git", "GitHub", "MySQL"],
+    toolsAndDatabases: ["Git", "GitHub", "MySQL", "PostgreSQL"],
     devops: ["Docker", "Kubernetes", "AWS", "Terraform", "GitHub Actions"],
     computerScience: ["Data Structures & Algorithms", "OOP", "Problem Solving"],
   },

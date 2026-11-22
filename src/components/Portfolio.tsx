@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useLayoutEffect } from "react";
-import Content from "./Content";
+import Content, { type PortfolioView } from "./Content";
 import Sidebar from "./Sidebar";
 import { gsap } from "gsap/gsap-core";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,6 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Portfolio = () => {
   const portfolioRef = useRef<HTMLDivElement>(null);
   const [portfolioReady, setPortfolioReady] = useState(false);
+  const [activeView, setActiveView] = useState<PortfolioView>("projects");
   const attachPortfolio = useCallback((element: HTMLDivElement | null) => {
     portfolioRef.current = element;
     setPortfolioReady(element !== null);
@@ -19,6 +20,7 @@ const Portfolio = () => {
   // Exit Prompt
   const [exitVisible, setExitVisible] = useState<boolean>(false);
   const exitRef = useRef(false);
+  const releaseScrollLockRef = useRef<(() => void) | null>(null);
   const [projectDialogOpen, setProjectDialogOpen] = useState(false);
   const handleProjectDialogChange = useCallback((open: boolean) => {
     setProjectDialogOpen(open);
@@ -35,32 +37,32 @@ const Portfolio = () => {
     let touchStartY = 0;
     let touchReady = false;
     let previousOverflow = "";
-    let locked = false;
+    let exitStage: "unlocked" | "waiting" | "prompt" = "unlocked";
     let hasEnteredPortfolio = false;
     let returningToHero = false;
+    let previousTop = portfolio.getBoundingClientRect().top;
 
     const portfolioTop = () => window.scrollY + portfolio.getBoundingClientRect().top;
     const alignPortfolio = () => {
       window.scrollTo({ top: portfolioTop(), behavior: "instant" });
     };
     const lockAtPortfolio = () => {
-      if (locked || exitRef.current) return;
+      if (exitStage !== "unlocked" || exitRef.current) return;
       exitRef.current = true;
-      locked = true;
+      exitStage = "waiting";
       touchReady = false;
       window.clearTimeout(snapTimer);
       document.documentElement.classList.remove("snap-y", "snap-proximity");
       previousOverflow = document.documentElement.style.overflow;
       document.documentElement.style.overflow = "hidden";
       alignPortfolio();
-      setExitVisible(true);
-      window.clearTimeout(promptTimer);
-      promptTimer = window.setTimeout(() => unlock(), 2000);
     };
     // Native snapping can land exactly at the boundary without firing onEnter.
     const onScroll = () => {
       const top = portfolio.getBoundingClientRect().top;
-      if (locked) {
+      const reachedTopFromBelow = previousTop < -1 && top >= -1;
+      previousTop = top;
+      if (exitStage !== "unlocked") {
         if (Math.abs(top) > 0.5) alignPortfolio();
         return;
       }
@@ -69,23 +71,24 @@ const Portfolio = () => {
         if (top > 1) returningToHero = false;
         return;
       }
-      if (top <= 1) {
+      if (hasEnteredPortfolio && (reachedTopFromBelow || top > 1)) {
+        lockAtPortfolio();
+      } else if (top <= 1) {
         hasEnteredPortfolio = true;
         exitRef.current = false;
-      } else if (hasEnteredPortfolio) {
-        lockAtPortfolio();
       }
     };
 
     const unlock = (returningToHero = false) => {
-      if (!locked) return;
-      locked = false;
+      if (exitStage === "unlocked") return;
+      exitStage = "unlocked";
       // Continuing through the portfolio must arm the boundary for the next visit.
       exitRef.current = returningToHero;
       window.clearTimeout(promptTimer);
       document.documentElement.style.overflow = previousOverflow;
       setExitVisible(false);
     };
+    releaseScrollLockRef.current = unlock;
 
     const leaveForHero = () => {
       returningToHero = true;
@@ -100,36 +103,47 @@ const Portfolio = () => {
       });
     };
 
+    const advanceExit = () => {
+      if (exitStage === "waiting") {
+        exitStage = "prompt";
+        setExitVisible(true);
+        promptTimer = window.setTimeout(() => unlock(), 2000);
+      } else if (exitStage === "prompt") {
+        leaveForHero();
+      }
+    };
+
+    const isAtPortfolioTop = () => Math.abs(portfolio.getBoundingClientRect().top) <= 1;
+
     const onWheel = (event: WheelEvent) => {
+      if (event.ctrlKey || event.deltaY === 0 || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
       const newGesture = !wheelActive;
       wheelActive = true;
       window.clearTimeout(wheelTimer);
       wheelTimer = window.setTimeout(() => {
         wheelActive = false;
       }, 200);
-      if (event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
-      const top = portfolio.getBoundingClientRect().top;
-      if (!locked && !exitRef.current && event.deltaY < 0 && top <= 1 && top >= -1) {
+      if (exitStage === "unlocked" && !exitRef.current && event.deltaY < 0 && isAtPortfolioTop()) {
         if (event.cancelable) event.preventDefault();
         lockAtPortfolio();
         return;
       }
-      if (!locked) return;
+      if (exitStage === "unlocked") return;
       if (event.cancelable) event.preventDefault();
-      if (newGesture && event.deltaY < 0) leaveForHero();
+      if (newGesture && event.deltaY < 0) advanceExit();
       else if (newGesture && event.deltaY > 0) unlock();
     };
     const onTouchStart = (event: TouchEvent) => {
       touchStartY = event.touches[0]?.clientY ?? 0;
-      touchReady = locked;
+      touchReady = exitStage !== "unlocked";
     };
     const onTouchMove = (event: TouchEvent) => {
-      if (!locked) return;
+      if (exitStage === "unlocked") return;
       if (event.cancelable) event.preventDefault();
       const distance = (event.touches[0]?.clientY ?? touchStartY) - touchStartY;
       if (touchReady && distance > 30) {
         touchReady = false;
-        leaveForHero();
+        advanceExit();
       } else if (touchReady && distance < -30) {
         touchReady = false;
         unlock();
@@ -139,19 +153,24 @@ const Portfolio = () => {
       touchReady = false;
     };
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!locked) return;
-      if (event.repeat) {
-        if (["ArrowUp", "PageUp", "Home", "ArrowDown", "PageDown", "End", " "].includes(event.key))
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
+      const scrollsUp = ["ArrowUp", "PageUp", "Home"].includes(event.key);
+      const scrollsDown = ["ArrowDown", "PageDown", "End", " "].includes(event.key);
+      if (!scrollsUp && !scrollsDown) return;
+      // Space activates a focused button or link through the browser's default behavior.
+      if (event.key === " " && event.target instanceof Element && event.target.closest("button, a")) return;
+
+      if (exitStage === "unlocked") {
+        if (scrollsUp && !exitRef.current && isAtPortfolioTop()) {
           event.preventDefault();
+          lockAtPortfolio();
+        }
         return;
       }
-      if (["ArrowUp", "PageUp", "Home"].includes(event.key)) {
-        event.preventDefault();
-        leaveForHero();
-      } else if (["ArrowDown", "PageDown", "End", " "].includes(event.key)) {
-        event.preventDefault();
-        unlock();
-      }
+      event.preventDefault();
+      if (event.repeat) return;
+      if (scrollsUp) advanceExit();
+      else unlock();
     };
     window.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("touchstart", onTouchStart, { passive: true });
@@ -165,7 +184,7 @@ const Portfolio = () => {
       trigger: portfolioRef.current,
       start: "top top",
       onEnter: () => {
-        if (!locked && !returningToHero) {
+        if (exitStage === "unlocked" && !returningToHero) {
           hasEnteredPortfolio = true;
           exitRef.current = false;
         }
@@ -179,10 +198,14 @@ const Portfolio = () => {
     onScroll();
 
     return () => {
+      releaseScrollLockRef.current = null;
       window.clearTimeout(snapTimer);
       window.clearTimeout(wheelTimer);
       window.clearTimeout(promptTimer);
-      if (locked) document.documentElement.style.overflow = previousOverflow;
+      if (exitStage !== "unlocked") {
+        document.documentElement.style.overflow = previousOverflow;
+        exitRef.current = false;
+      }
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchmove", onTouchMove);
@@ -202,9 +225,20 @@ const Portfolio = () => {
       className="overflow-x-clip min-[801px]:flex min-[801px]:items-start snap-start snap-always"
     >
       <AnimatePresence>{exitVisible && <ExitPrompt key="exit-prompt" />}</AnimatePresence>
-      {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
       {portfolioReady && (
-        <Content portfolioRef={portfolioRef} onProjectDialogChange={handleProjectDialogChange} />
+        <Sidebar
+          portfolioRef={portfolioRef}
+          activeView={activeView}
+          onViewChange={setActiveView}
+          onContactNavigate={() => releaseScrollLockRef.current?.()}
+        />
+      )}
+      {portfolioReady && (
+        <Content
+          portfolioRef={portfolioRef}
+          activeView={activeView}
+          onProjectDialogChange={handleProjectDialogChange}
+        />
       )}
     </div>
   );
