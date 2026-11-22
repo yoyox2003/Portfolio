@@ -13,9 +13,10 @@ type sidebarProps = {
   portfolioRef: RefObject<HTMLDivElement | null>;
   activeView: PortfolioView;
   onViewChange: (view: PortfolioView) => void;
+  onContactNavigate: () => void;
 };
 
-const Sidebar = ({ portfolioRef, activeView, onViewChange }: sidebarProps) => {
+const Sidebar = ({ portfolioRef, activeView, onViewChange, onContactNavigate }: sidebarProps) => {
   const sidebarRef = useRef<HTMLElement>(null);
 
   useLayoutEffect(() => {
@@ -98,7 +99,14 @@ const Sidebar = ({ portfolioRef, activeView, onViewChange }: sidebarProps) => {
           >
             Skills
           </button>
-          <a className={linkStyle + " sidebar-item inline-block"} href="#contact">
+          <a
+            className={linkStyle + " sidebar-item inline-block"}
+            href="#contact"
+            onClick={(event) => {
+              if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+              onContactNavigate();
+            }}
+          >
             Contact
           </a>
         </nav>
