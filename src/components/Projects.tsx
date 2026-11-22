@@ -17,16 +17,17 @@ const Projects = ({ onDialogChange }: ProjectsProps) => {
     <>
       <div className="grid grid-cols-1 gap-[1.25em] @min-[640px]:grid-cols-2">
         {projects.map((project) => (
-          <ProjectCard
-            key={project.name}
-            {...project}
-            onOpen={(trigger) => {
-              triggerRef.current = trigger;
-              setSelectedProject(project);
-              onDialogChange(true);
-              setOpen(true);
-            }}
-          />
+          <div key={project.name} className="content-animation min-w-0">
+            <ProjectCard
+              {...project}
+              onOpen={(trigger) => {
+                triggerRef.current = trigger;
+                setSelectedProject(project);
+                onDialogChange(true);
+                setOpen(true);
+              }}
+            />
+          </div>
         ))}
       </div>
       <ProjectDetailsModal

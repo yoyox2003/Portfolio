@@ -8,7 +8,14 @@ type ProjectCardProps = Project & {
   onOpen: (trigger: HTMLButtonElement) => void;
 };
 
-const ProjectCard = ({ name, assets, description, repository, textOnly, onOpen }: ProjectCardProps) => {
+const ProjectCard = ({
+  name,
+  assets,
+  description,
+  repository,
+  textOnly,
+  onOpen,
+}: ProjectCardProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const handlePointerEnter = (event: PointerEvent<HTMLElement>) => {
@@ -30,7 +37,7 @@ const ProjectCard = ({ name, assets, description, repository, textOnly, onOpen }
 
   return (
     <article
-      className="content-animation relative w-full min-w-0 overflow-hidden rounded-[1em] bg-[#262422]"
+      className="relative h-full w-full min-w-0 overflow-hidden rounded-[1em] bg-[#262422] motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out motion-safe:hover:scale-[1.02]"
       onPointerEnter={handlePointerEnter}
       onPointerLeave={handlePointerLeave}
     >
