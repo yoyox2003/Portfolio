@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useLayoutEffect } from "react";
-import Content from "./Content";
+import Content, { type PortfolioView } from "./Content";
 import Sidebar from "./Sidebar";
 import { gsap } from "gsap/gsap-core";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -11,6 +11,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Portfolio = () => {
   const portfolioRef = useRef<HTMLDivElement>(null);
   const [portfolioReady, setPortfolioReady] = useState(false);
+  const [activeView, setActiveView] = useState<PortfolioView>("projects");
   const attachPortfolio = useCallback((element: HTMLDivElement | null) => {
     portfolioRef.current = element;
     setPortfolioReady(element !== null);
@@ -202,9 +203,15 @@ const Portfolio = () => {
       className="overflow-x-clip min-[801px]:flex min-[801px]:items-start snap-start snap-always"
     >
       <AnimatePresence>{exitVisible && <ExitPrompt key="exit-prompt" />}</AnimatePresence>
-      {portfolioReady && <Sidebar portfolioRef={portfolioRef} />}
       {portfolioReady && (
-        <Content portfolioRef={portfolioRef} onProjectDialogChange={handleProjectDialogChange} />
+        <Sidebar portfolioRef={portfolioRef} activeView={activeView} onViewChange={setActiveView} />
+      )}
+      {portfolioReady && (
+        <Content
+          portfolioRef={portfolioRef}
+          activeView={activeView}
+          onProjectDialogChange={handleProjectDialogChange}
+        />
       )}
     </div>
   );

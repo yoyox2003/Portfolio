@@ -17,7 +17,7 @@ const Projects = ({ onDialogChange }: ProjectsProps) => {
     <>
       <div className="grid grid-cols-1 gap-[1.25em] @min-[640px]:grid-cols-2">
         {projects.map((project) => (
-          <div key={project.name} className="content-animation min-w-0">
+          <div key={project.name} className="min-w-0">
             <ProjectCard
               {...project}
               onOpen={(trigger) => {
